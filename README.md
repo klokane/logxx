@@ -39,11 +39,15 @@ help macros to allow disable logging evaluation
     #define LOG(level) if (logxx::logger::log().severity() >= logxx::level) logxx::logger::log().get(logxx::level)
 
 original code:
-    LOG(debug) << "TEST";
+
+    LOG(debug) << someReallyLongTimeConsumingDump() << std::endl;
 
 expanded code:
+
     if (logxx::logger::log().severity() >= logxx::debug) 
-        logxx::logger::log().get(logxx::debug) << "TEST";
+        logxx::logger::log().get(logxx::debug) << someReallyLongTimeConsumingDump() << std::endl;
+
+so evaluation of someReallyLongTimeConsumingDump() is just unly when debug severity is enabled
 
 
 

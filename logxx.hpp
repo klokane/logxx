@@ -2,6 +2,10 @@
 
 #define LOGXX_5JKQSPQI
 
+//  Copyright Jiri Kratochvil (aka KLoK) 2010
+//  Distributed under the Boost Software License, Version 1.0.
+//  (see at http://www.boost.org/LICENSE_1_0.txt)
+
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -80,7 +84,6 @@ public:
   basic_channel& channel() { if(!channel_) channel_.reset(new no_channel_policy); return *channel_; }
 
   std::ostream& get(int severity) {
-    //std::cout << __FUNCTION__ << ": " << this << std::endl;
     return filter_.filter(severity,channel(),format_);
   }
 

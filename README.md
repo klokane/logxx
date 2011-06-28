@@ -36,7 +36,7 @@ fast start with zeroconfig ability
 help macros to allow disable logging evaluation
 ------------------------------------------------
 
-#define LOG(level) if (logxx::logger::log().severity() >= logxx::level) logxx::logger::log().get(logxx::level)
+    #define LOG(level) if (logxx::logger::log().severity() >= logxx::level) logxx::logger::log().get(logxx::level)
 
 original code:
     LOG(debug) << "TEST";

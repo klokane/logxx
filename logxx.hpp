@@ -114,6 +114,11 @@ public:
     boost::shared_ptr<self_t> r = loggers_[name];
     if(!r) {
       r.reset(new self_t);
+      if(!name.empty()) { // as default - channel from root logger
+        boost::shared_ptr<self_t> root = loggers_[""];
+        r->channel_ = root->channel_;
+        r->filter_.severity_ = root->filter_.severity_;
+      }
       loggers_[name] = r;
     }
     return *r;
@@ -232,10 +237,13 @@ typedef class basic_logger<std_format, std_filter> logger;
 
 }
 
+//#define DEFAULT_LOG_CHANNEL(ch) logxx::logger::log().channel(ch)
+
 #define LOG(level) if (logxx::logger::log().severity() >= logxx::level) logxx::logger::log().get(logxx::level)
 #define LOG_(sink, level) if (logxx::logger::log(sink).severity() >= logxx::level) logxx::logger::log(sink).get(logxx::level)
 
 #define DUMP(addr, len) if (logxx::logger::log().severity() >= logxx::debug) logxx::logger::log().dump((void*)addr,len)
+
 
 #define LOG_IF(condition, level) if ((condition) && logxx::logger::log().severity() >= logxx::level) logxx::logger::log().get(logxx::level)
 #define LOG_IF_(condition, sink, level) if ((condition) && logxx::logger::log(sink).severity() >= logxx::level) logxx::logger::log(sink).get(logxx::level)

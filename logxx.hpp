@@ -1,6 +1,5 @@
 #ifndef LOGXX_5JKQSPQI
 // vi:cin:et:sw=2 ts=2
-
 #define LOGXX_5JKQSPQI
 
 //  Copyright Jiri Kratochvil (aka KLoK) 2010

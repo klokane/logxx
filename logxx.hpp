@@ -15,6 +15,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/smart_ptr/scoped_ptr.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include <boost/format.hpp>
 
 
 namespace logxx {
@@ -98,6 +99,18 @@ public:
   inline void filter(int severity) { filter_.severity_ = severity; }
   inline int severity() const { return filter_.severity_; }
 
+  void dump(void* addr, int len) {
+    if(filter_.severity_ < logxx::debug) return;
+    unsigned char* a = reinterpret_cast<unsigned char*>(addr);
+    get(logxx::debug) << boost::format("DUMP [%p(%d)]:") % addr % len << std::endl;
+    for(int i = 0 ; i < len ; ++i ) {
+      channel_->stream() << boost::format("%02x%c")
+        % (unsigned int)(a[i])
+        % ((i+1)%16?' ':'\n');
+    }
+    channel_->stream() << std::endl;
+  }
+
 protected:
   boost::shared_ptr<basic_channel> channel_;
   format_policy format_;
@@ -144,6 +157,8 @@ typedef class basic_logger<std_format, std_filter> logger;
 
 #define LOG(level) if (logxx::logger::log().severity() >= logxx::level) logxx::logger::log().get(logxx::level)
 #define LOG_(sink, level) if (logxx::logger::log(sink).severity() >= logxx::level) logxx::logger::log(sink).get(logxx::level)
+
+#define DUMP(addr, len) if (logxx::logger::log().severity() >= logxx::debug) logxx::logger::log().dump((void*)addr,len)
 
 #define LOG_IF(condition, level) if ((condition) && logxx::logger::log().severity() >= logxx::level) logxx::logger::log().get(logxx::level)
 #define LOG_IF_(condition, sink, level) if ((condition) && logxx::logger::log(sink).severity() >= logxx::level) logxx::logger::log(sink).get(logxx::level)

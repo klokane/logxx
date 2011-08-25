@@ -6,6 +6,7 @@
 //  Distributed under the Boost Software License, Version 1.0.
 //  (see at http://www.boost.org/LICENSE_1_0.txt)
 
+
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -17,11 +18,15 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/format.hpp>
 
+#ifndef LOGXX_DEFAULT_LOGGER
+#define LOGXX_DEFAULT_LOGGER logxx::logger
+#endif
+
 #ifndef LOGXX_DEFAULT_LEVEL
 #define LOGXX_DEFAULT_LEVEL logxx::debug
 #endif
 
-// IDEA: load basic level from ENVIRONMENT
+// IDEA: load dynamicaly LEVEL from ENVIRONMENT
 
 
 namespace logxx {
@@ -114,6 +119,7 @@ public:
    * logger instances are holds by boost::shared_ptr so you need no care about free instance
    */
   static self_t& log(const std::string& name = "") {
+    // IDEA: move creating strategy into another policy
     boost::shared_ptr<self_t> r = loggers_[name];
     if(!r) {
       r.reset(new self_t);
@@ -203,6 +209,8 @@ struct basic_format {
   virtual std::ostream& format(int severity, basic_channel& out) = 0;
 };
 
+// IDEA: filter should receive ref to logger to allow identify name logger, 
+// instead of directly writing to channel just only receive message, create envelope and return it??
 struct std_format : basic_format {
   std::ostream& format(int severity, basic_channel& out) {
     return (out.stream()
@@ -245,15 +253,16 @@ typedef class basic_logger<LOGXX_DEFAULT_LEVEL , std_format, std_filter> logger;
 
 }
 
-//#define DEFAULT_LOG_CHANNEL(ch) logxx::logger::log().channel(ch)
+#define LOG_CHANNEL(ch) LOGXX_DEFAULT_LOGGER::log().channel(ch)
+#define LOG_CHANNEL_(sink, ch) LOGXX_DEFAULT_LOGGER::log(sink).channel(ch)
 
-#define LOG(level) if (logxx::logger::log().severity() >= logxx::level) logxx::logger::log().get(logxx::level)
-#define LOG_(sink, level) if (logxx::logger::log(sink).severity() >= logxx::level) logxx::logger::log(sink).get(logxx::level)
+#define LOG(level) if (LOGXX_DEFAULT_LOGGER::log().severity() >= logxx::level) LOGXX_DEFAULT_LOGGER::log().get(logxx::level)
+#define LOG_(sink, level) if (LOGXX_DEFAULT_LOGGER::log(sink).severity() >= logxx::level) LOGXX_DEFAULT_LOGGER::log(sink).get(logxx::level)
 
-#define DUMP(addr, len) if (logxx::logger::log().severity() >= logxx::debug) logxx::logger::log().dump((void*)addr,len)
+#define DUMP(addr, len) if (LOGXX_DEFAULT_LOGGER::log().severity() >= logxx::debug) LOGXX_DEFAULT_LOGGER::log().dump((void*)addr,len)
 
 
-#define LOG_IF(condition, level) if ((condition) && logxx::logger::log().severity() >= logxx::level) logxx::logger::log().get(logxx::level)
-#define LOG_IF_(condition, sink, level) if ((condition) && logxx::logger::log(sink).severity() >= logxx::level) logxx::logger::log(sink).get(logxx::level)
+#define LOG_IF(condition, level) if ((condition) && LOGXX_DEFAULT_LOGGER::log().severity() >= logxx::level) LOGXX_DEFAULT_LOGGER::log().get(logxx::level)
+#define LOG_IF_(condition, sink, level) if ((condition) && LOGXX_DEFAULT_LOGGER::log(sink).severity() >= logxx::level) LOGXX_DEFAULT_LOGGER::log(sink).get(logxx::level)
 
 #endif /* end of include guard: LOGXX_5JKQSPQI */

@@ -81,10 +81,10 @@ public:
    * logger instances are holds by boost::shared_ptr so you need no care about free instance
    */
   static self_t& log(const std::string& name = "") {
-    boost::shared_ptr<self_t> r = channels_[name];
+    boost::shared_ptr<self_t> r = loggers_[name];
     if(!r) {
       r.reset(new self_t);
-      channels_[name] = r;
+      loggers_[name] = r;
     }
     return *r;
   }
@@ -144,13 +144,13 @@ protected:
   boost::shared_ptr<basic_channel> channel_;
   format_policy format_;
   filter_policy filter_;
-  static std::map<std::string, boost::shared_ptr<self_t> > channels_;
+  static std::map<std::string, boost::shared_ptr<self_t> > loggers_;
 };
 
 // init static member :)
 template <class format_policy, class filter_policy, class no_channel_policy>
 std::map<std::string, boost::shared_ptr<basic_logger<format_policy,filter_policy,no_channel_policy> >  > 
-  basic_logger<format_policy,filter_policy,no_channel_policy>::channels_;
+  basic_logger<format_policy,filter_policy,no_channel_policy>::loggers_;
 
 
 /**

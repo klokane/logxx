@@ -116,6 +116,7 @@ public:
       r.reset(new self_t);
       if(!name.empty()) { // as default - channel from root logger
         boost::shared_ptr<self_t> root = loggers_[""];
+        if(!root) root.reset(new self_t); // if not root loger in repository create new one with default settings
         r->channel_ = root->channel_;
         r->filter_.severity_ = root->filter_.severity_;
       }

@@ -143,15 +143,19 @@ public:
    * return instance of filter to send log on
    */
   std::ostream& get(int level) {
-    return filter_.filter(level,channel(),format_);
+    std::ostream& o = filter_(level,*this);
+    o << format_(level,*this);
+    return o;
   }
 
+#if 0
   /**
    * shortcut of ::get() method
    */
   std::ostream& operator()(int level) {
-    return filter_.filter(level,channel(),format_);
+    return filter_.filter(level,*this);
   }
+#endif
 
   virtual ~basic_logger() {
     if (channel_) channel_->flush();
@@ -208,22 +212,15 @@ std::map<std::string, boost::shared_ptr<basic_logger<default_level, format_polic
 /**
  * message formater
  */
-struct basic_format {
-  virtual std::ostream& format(int level, basic_channel& out) = 0;
-};
-
-// IDEA: filter should receive ref to logger to allow identify name logger, 
-// instead of directly writing to channel just only receive message, create envelope and return it??
-struct std_format : basic_format {
-  std::ostream& format(int level, basic_channel& out) {
-    return (out.stream()
-        << boost::posix_time::second_clock::universal_time()
-        << " [" << getpid() << "]"
-        << " <" << level << ">"
-        << ": "
-  );
-}
-
+struct std_format {
+template<class Tlogger>
+  std::string operator()(int level, Tlogger& l) { 
+    using boost::format;
+    return str(format("%s [%d] <%d>: ")
+        % boost::posix_time::second_clock::universal_time()
+        % getpid() 
+        % level);
+  }
 };
 
 /**
@@ -239,11 +236,12 @@ struct std_format : basic_format {
  * some of ideas will be added into logxx lib in future
  */
 struct std_filter {
-  std::ostream& filter(int level, basic_channel& s, basic_format& f) {
+template<class Tlogger>
+  std::ostream& operator()(int level, Tlogger& l) {
     static nullstream null;
-    return level <= level_ 
-      ? f.format(level,s)
-      : null;
+    return level <= level_
+        ? l.channel().stream()
+        : null;
   }
 
   int level_;

@@ -1,4 +1,5 @@
 #ifndef LOGXX_5JKQSPQI
+// vi:cin:et:sw=2 ts=2
 
 #define LOGXX_5JKQSPQI
 
@@ -71,6 +72,9 @@ public:
   basic_logger(int severity = debug) {
     filter_.severity_ = severity; 
   }
+
+
+
 
   static self_t& log(const std::string& name = "") {
     boost::shared_ptr<self_t> r = channels_[name];

@@ -17,6 +17,12 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/format.hpp>
 
+#ifndef LOGXX_DEFAULT_LEVEL
+#define LOGXX_DEFAULT_LEVEL logxx::debug
+#endif
+
+// IDEA: load basic level from ENVIRONMENT
+
 
 namespace logxx {
 
@@ -93,15 +99,12 @@ typedef enum {
  *
  */
 
-template <class format_policy, class filter_policy, class no_channel_policy = console_channel>
+template <int default_level, class format_policy, class filter_policy, class no_channel_policy = console_channel>
 class basic_logger {
 public:
-  typedef basic_logger<format_policy, filter_policy, no_channel_policy> self_t;
+  typedef basic_logger<default_level, format_policy, filter_policy, no_channel_policy> self_t;
 public:
 
-  basic_logger(int severity = debug) {
-    filter_.severity_ = severity; 
-  }
 
   /**
    * Heart of logger. 
@@ -114,7 +117,7 @@ public:
     boost::shared_ptr<self_t> r = loggers_[name];
     if(!r) {
       r.reset(new self_t);
-      if(!name.empty()) { // as default - channel from root logger
+      if(!name.empty()) { // as default - copy channel properties root logger
         boost::shared_ptr<self_t> root = loggers_[""];
         if(!root) root.reset(new self_t); // if not root loger in repository create new one with default settings
         r->channel_ = root->channel_;
@@ -181,12 +184,16 @@ protected:
   format_policy format_;
   filter_policy filter_;
   static std::map<std::string, boost::shared_ptr<self_t> > loggers_;
+
+  basic_logger(int severity = default_level) {
+    filter_.severity_ = severity; 
+  }
 };
 
 // init static member :)
-template <class format_policy, class filter_policy, class no_channel_policy>
-std::map<std::string, boost::shared_ptr<basic_logger<format_policy,filter_policy,no_channel_policy> >  > 
-  basic_logger<format_policy,filter_policy,no_channel_policy>::loggers_;
+template <int default_level, class format_policy, class filter_policy, class no_channel_policy>
+std::map<std::string, boost::shared_ptr<basic_logger<default_level, format_policy,filter_policy,no_channel_policy> >  > 
+  basic_logger<default_level, format_policy,filter_policy,no_channel_policy>::loggers_;
 
 
 /**
@@ -234,7 +241,7 @@ struct std_filter {
 /**
  * predefined logger with most basic policy to allow trivial log
  */
-typedef class basic_logger<std_format, std_filter> logger;
+typedef class basic_logger<LOGXX_DEFAULT_LEVEL , std_format, std_filter> logger;
 
 }
 

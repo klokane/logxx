@@ -122,10 +122,10 @@ public:
     // IDEA: move creating strategy into another policy
     boost::shared_ptr<self_t> r = loggers_[name];
     if(!r) {
-      r.reset(new self_t);
+      r.reset(new self_t(name));
       if(!name.empty()) { // as default - copy channel properties root logger
         boost::shared_ptr<self_t> root = loggers_[""];
-        if(!root) root.reset(new self_t); // if not root loger in repository create new one with default settings
+        if(!root) root.reset(new self_t(name)); // if not root loger in repository create new one with default settings
         r->channel_ = root->channel_;
         r->filter_.level_ = root->filter_.level_;
       }
@@ -133,6 +133,8 @@ public:
     }
     return *r;
   }
+
+  const std::string& name() const { return name_; }
 
   void channel(basic_channel* channel) { if(channel_) channel_->flush() ; channel_.reset(channel); }
   basic_channel& channel() { if(!channel_) channel_.reset(new no_channel_policy); return *channel_; }
@@ -189,10 +191,11 @@ protected:
   boost::shared_ptr<basic_channel> channel_;
   format_policy format_;
   filter_policy filter_;
+  std::string name_;
   static std::map<std::string, boost::shared_ptr<self_t> > loggers_;
 
-  basic_logger(int level = default_level) {
-    filter_.level_ = level; 
+  basic_logger(const std::string& name) : name_(name) {
+    filter_.level_ = default_level; 
   }
 };
 

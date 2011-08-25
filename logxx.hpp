@@ -73,9 +73,13 @@ public:
     filter_.severity_ = severity; 
   }
 
-
-
-
+  /**
+   * Heart of logger. 
+   * return instance of logger from logger repository
+   * if logger doesn't exists create new one. 
+   *
+   * logger instances are holds by boost::shared_ptr so you need no care about free instance
+   */
   static self_t& log(const std::string& name = "") {
     boost::shared_ptr<self_t> r = channels_[name];
     if(!r) {
@@ -88,10 +92,16 @@ public:
   void channel(basic_channel* channel) { if(channel_) channel_->flush() ; channel_.reset(channel); }
   basic_channel& channel() { if(!channel_) channel_.reset(new no_channel_policy); return *channel_; }
 
+  /**
+   * return instance of filter to send log on
+   */
   std::ostream& get(int severity) {
     return filter_.filter(severity,channel(),format_);
   }
 
+  /**
+   * shortcut of ::get() method
+   */
   std::ostream& operator()(int severity) {
     return filter_.filter(severity,channel(),format_);
   }
@@ -100,9 +110,24 @@ public:
     if (channel_) channel_->flush();
   }
 
+  /**
+   * setup filter level for given channel
+   *
+   * usage:
+   * logxx::logger::log().filter(logxx::debug)
+   */
   inline void filter(int severity) { filter_.severity_ = severity; }
+
+  /**
+   * return current severity of filter
+   */  
   inline int severity() const { return filter_.severity_; }
 
+  /**
+   * hex memory dump from @param addr and length @param len
+   *
+   * dump() is by default sent to debug level
+   */
   void dump(void* addr, int len) {
     if(filter_.severity_ < logxx::debug) return;
     unsigned char* a = reinterpret_cast<unsigned char*>(addr);
@@ -128,6 +153,9 @@ std::map<std::string, boost::shared_ptr<basic_logger<format_policy,filter_policy
   basic_logger<format_policy,filter_policy,no_channel_policy>::channels_;
 
 
+/**
+ * message formater
+ */
 struct basic_format {
   virtual std::ostream& format(int severity, basic_channel& out) = 0;
 };
@@ -144,6 +172,18 @@ struct std_format : basic_format {
 
 };
 
+/**
+ * log filter - 
+ *   it takes care on filtering sent messages
+ *   std_filter will send everything with higher level than severity into null channel
+ *
+ *   it is meant for extending eg. 
+ *   - abort program when severity is lower than "critical"
+ *   - sent critical events to different channel eg. syslog
+ *   - assertion for debug version
+ *
+ * some of ideas will be added into logxx lib in future
+ */
 struct std_filter {
   std::ostream& filter(int severity, basic_channel& s, basic_format& f) {
     static nullstream null;
@@ -155,6 +195,9 @@ struct std_filter {
   int severity_;
 };
 
+/**
+ * predefined logger with most basic policy to allow trivial log
+ */
 typedef class basic_logger<std_format, std_filter> logger;
 
 }

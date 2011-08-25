@@ -53,6 +53,13 @@ private:
   static nullstream null_;
 };
 
+//
+// TODO: 
+// - tee_channel, 
+// - syslog channel, 
+// - anything other??
+//
+
 typedef enum {
   fatal,
   error,

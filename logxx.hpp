@@ -104,10 +104,10 @@ typedef enum {
  *
  */
 
-template <int default_level, class format_policy, class filter_policy, class no_channel_policy = console_channel>
+template <int default_level, class format_policy, class filter_policy, class default_channel = console_channel>
 class basic_logger {
 public:
-  typedef basic_logger<default_level, format_policy, filter_policy, no_channel_policy> self_t;
+  typedef basic_logger<default_level, format_policy, filter_policy, default_channel> self_t;
 public:
 
 
@@ -137,7 +137,7 @@ public:
   const std::string& name() const { return name_; }
 
   void channel(basic_channel* channel) { if(channel_) channel_->flush() ; channel_.reset(channel); }
-  basic_channel& channel() { if(!channel_) channel_.reset(new no_channel_policy); return *channel_; }
+  basic_channel& channel() { if(!channel_) channel_.reset(new default_channel); return *channel_; }
 
   /**
    * return instance of filter to send log on
@@ -204,9 +204,9 @@ protected:
 };
 
 // init static member :)
-template <int default_level, class format_policy, class filter_policy, class no_channel_policy>
-std::map<std::string, boost::shared_ptr<basic_logger<default_level, format_policy,filter_policy,no_channel_policy> >  > 
-  basic_logger<default_level, format_policy,filter_policy,no_channel_policy>::loggers_;
+template <int default_level, class format_policy, class filter_policy, class default_channel>
+std::map<std::string, boost::shared_ptr<basic_logger<default_level, format_policy,filter_policy,default_channel> >  > 
+  basic_logger<default_level, format_policy,filter_policy,default_channel>::loggers_;
 
 
 /**

@@ -50,7 +50,7 @@ public:
   std::ostream& stream() { return null_; }
   std::ostream& flush() { return null_.flush(); }
 private:
-  nullstream null_;
+  static nullstream null_;
 };
 
 typedef enum {

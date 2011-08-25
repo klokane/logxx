@@ -63,6 +63,30 @@ typedef enum {
 } severity;
 
 
+/**
+ * basic logger
+ *
+ * policy based logger - idea:
+ *
+ * logger - there is root logger (without name), all messages are sent there
+ * you can create new one "on fly" just by send name into logger::log() static method
+ * if logger does not exists, new one is created
+ *
+ * all loggers inherit basic settings from "root logger" when created
+ *
+ *
+ * filter_policy - decide what will happens with message
+ * format_policy - add some envelope to message (e.g. time, severity, etc)
+ * channel_policy - messages which goes through filter are sent into
+ *
+ * basic flow: 
+ * message is sent to logger ->
+ * logger will sent message to filter ->
+ * filter will use formater to add message envelope 
+ * and in next step will decide what to do with message (usualy send into channel)
+ *
+ */
+
 template <class format_policy, class filter_policy, class no_channel_policy = console_channel>
 class basic_logger {
 public:

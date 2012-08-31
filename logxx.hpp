@@ -14,7 +14,6 @@
 #include <string>
 #include <map>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/smart_ptr/scoped_ptr.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/format.hpp>
 

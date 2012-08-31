@@ -53,14 +53,18 @@ private:
   std::ofstream file_;
 };
 
-struct nullstream : std::ostream { nullstream():std::ostream(0){} };
 
 class null_channel : public basic_channel {
 public:
-  std::ostream& stream() { return null_; }
-  std::ostream& flush() { return null_.flush(); }
+  std::ostream& stream() { return null(); }
+  std::ostream& flush() { return null().flush(); }
+
+  struct nullstream : std::ostream { nullstream():std::ostream(0){} };
 private:
-  static nullstream null_;
+  std::ostream& null() {
+    static nullstream null_;
+    return null_;
+  }
 };
 
 //
@@ -238,10 +242,10 @@ template<class Tlogger>
 struct std_filter {
 template<class Tlogger>
   std::ostream& operator()(int level, Tlogger& l) {
-    static nullstream null;
+    static null_channel null;
     return level <= level_
         ? l.channel().stream()
-        : null;
+        : null.stream();
   }
 
   int level_;
